@@ -1,0 +1,207 @@
+@import url('https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600&display=swap');
+
+:root {
+    --primary-color: #4a90e2;
+    --secondary-color: #f39c12;
+    --background-color: #f4f7f9;
+    --card-color: #ffffff;
+    --text-color: #333333;
+    --completed-color: #27ae60;
+}
+
+body {
+    min-height: 100vh;
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    font-family: 'Poppins', sans-serif;
+    padding: 20px;
+    margin: 0;
+}
+
+.container {
+    position: relative;
+    max-width: 800px;
+    width: 100%;
+}
+
+.card {
+    background: var(--card-color);
+    padding: 40px;
+    border-radius: 20px;
+    box-shadow: 0 20px 60px rgba(0, 0, 0, 0.1);
+    backdrop-filter: blur(10px);
+    transform-style: preserve-3d;
+    perspective: 1000px;
+}
+
+h1 {
+    text-align: center;
+    color: var(--primary-color);
+    margin-bottom: 30px;
+    font-size: 2.5em;
+    font-weight: 600;
+    transform: translateZ(50px);
+    transition: transform 0.3s ease-out;
+}
+
+h1:hover {
+    transform: translateZ(75px) scale(1.05);
+}
+
+form {
+    margin-bottom: 30px;
+}
+
+.input-group {
+    position: relative;
+    margin-bottom: 20px;
+}
+
+.input-group input {
+    width: 100%;
+    padding: 10px;
+    border: none;
+    border-bottom: 2px solid var(--primary-color);
+    background: transparent;
+    color: var(--text-color);
+    font-size: 16px;
+    transition: all 0.3s ease;
+}
+
+.input-group label {
+    position: absolute;
+    top: 0;
+    left: 0;
+    padding: 10px;
+    pointer-events: none;
+    transition: all 0.3s ease;
+    color: var(--primary-color);
+}
+
+.input-group input:focus,
+.input-group input:valid {
+    outline: none;
+    border-bottom-color: var(--secondary-color);
+}
+
+.input-group input:focus + label,
+.input-group input:valid + label {
+    transform: translateY(-20px);
+    font-size: 12px;
+    color: var(--secondary-color);
+}
+
+button {
+    width: 100%;
+    padding: 12px;
+    background-color: var(--primary-color);
+    color: white;
+    border: none;
+    border-radius: 30px;
+    font-size: 16px;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    transform: translateZ(20px);
+    box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+}
+
+button:hover {
+    background-color: var(--secondary-color);
+    transform: translateZ(30px) scale(1.05);
+    box-shadow: 0 8px 25px rgba(0, 0, 0, 0.2);
+}
+
+ul {
+    list-style-type: none;
+    padding: 0;
+}
+
+li {
+    background: var(--background-color);
+    margin-bottom: 15px;
+    padding: 20px;
+    border-radius: 10px;
+    box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+    transition: all 0.3s ease;
+    transform: translateZ(0);
+}
+
+li:hover {
+    transform: translateZ(20px) scale(1.03);
+    box-shadow: 0 8px 25px rgba(0, 0, 0, 0.2);
+}
+
+.task-content {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.task-text {
+    flex-grow: 1;
+    margin-left: 10px;
+}
+
+.task-date {
+    font-size: 0.8em;
+    color: #888;
+}
+
+.task-actions {
+    display: flex;
+    justify-content: flex-end;
+    margin-top: 10px;
+}
+
+.task-actions button {
+    padding: 5px 10px;
+    font-size: 14px;
+    margin-left: 10px;
+    width: auto;
+}
+
+.edit-form {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+}
+
+.edit-form input {
+    border: 1px solid #ccc;
+    border-radius: 5px;
+    padding: 8px;
+}
+
+.edit-form button {
+    width: auto;
+}
+
+@keyframes float {
+    0% { transform: translateY(0px) rotateX(0deg) rotateY(0deg); }
+    50% { transform: translateY(-20px) rotateX(5deg) rotateY(5deg); }
+    100% { transform: translateY(0px) rotateX(0deg) rotateY(0deg); }
+}
+
+.card {
+    animation: float 6s ease-in-out infinite;
+}
+
+@media (max-width: 600px) {
+    .card {
+        padding: 20px;
+    }
+
+    h1 {
+        font-size: 2em;
+    }
+}
+
+.urgent {
+    color: red;
+}
+
+.non-urgent {
+    color: green;
+}

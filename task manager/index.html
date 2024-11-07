@@ -1,0 +1,193 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Task Manager</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <div class="container">
+        <div class="card">
+            <h1>Task Manager</h1>
+            
+            <form id="taskForm">
+                <div class="input-group">
+                    <input type="text" id="newTask" placeholder="" required>
+                    <label for="newTask">New Task</label>
+                </div>
+                <div class="input-group">
+                    <input type="datetime-local" id="newDueDate">
+                    <label for="newDueDate">Due Date</label>
+                </div>
+                <div class="input-group">
+                    <label for="urgentCheckbox">Urgent</label>
+                    <input type="checkbox" id="urgentCheckbox">
+                </div>                
+                <button type="submit">
+                    <i class="fas fa-plus"></i> Add Task
+                </button>
+            </form>
+            
+            
+            
+            
+            <ul id="taskList"></ul>
+        </div>
+    </div>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.9.1/gsap.min.js"></script>
+    <script>
+        let tasks = [];
+
+        function fetchTasks() {
+    const formData = new FormData();
+    formData.append('action', 'read');
+
+    fetch('crud.php', {
+        method: 'POST',
+        body: formData
+    })
+    .then(response => response.json())
+    .then(data => {
+        tasks = data;
+        renderTasks();
+    });
+}
+
+
+function renderTasks() {
+    const taskList = document.getElementById('taskList');
+    taskList.innerHTML = '';
+    tasks.forEach((task, index) => {
+        const li = document.createElement('li');
+        
+        const taskColor = task.urgent == 1 ? 'red' : 'green';
+
+        li.innerHTML = `
+            <div class="task-content">
+                <input type="checkbox" ${task.completed ? 'checked' : ''} onchange="toggleTask(${task.id}, ${task.completed ? 0 : 1})">
+                <span class="task-text ${task.completed ? 'completed' : ''}" style="color: ${taskColor};">${task.text}</span>
+            </div>
+            <div class="task-date">
+                <p>Created: ${formatDate(task.created_at)}</p>
+                <p>Due: ${formatDate(task.due_date)}</p>
+            </div>
+            <div class="task-actions">
+                <button onclick="editTask(${index})"><i class="fas fa-edit"></i></button>
+                <button onclick="deleteTask(${task.id})"><i class="fas fa-trash"></i></button>
+            </div>
+        `;
+        
+        taskList.appendChild(li);
+        gsap.from(li, {opacity: 0, y: 20, duration: 0.5, delay: index * 0.1});
+    });
+}
+
+
+function addTask(event) {
+    event.preventDefault();
+    const taskInput = document.getElementById('newTask');
+    const dueDateInput = document.getElementById('newDueDate');
+    const urgentCheckbox = document.getElementById('urgentCheckbox');
+    const text = taskInput.value.trim();
+    const dueDate = dueDateInput.value || new Date().toISOString();
+    const urgent = urgentCheckbox.checked ? '1' : '0'; 
+
+    if (text) {
+        const formData = new FormData();
+        formData.append('action', 'add');
+        formData.append('text', text);
+        formData.append('dueDate', dueDate);
+        formData.append('urgent', urgent); 
+
+        fetch('crud.php', {
+            method: 'POST',
+            body: formData
+        }).then(() => {
+            taskInput.value = '';
+            dueDateInput.value = '';
+            urgentCheckbox.checked = false; 
+            fetchTasks();
+        });
+    }
+}
+
+
+
+        function toggleTask(id, completed) {
+            const task = tasks.find(task => task.id === id);
+            if (task) {
+                const formData = new FormData();
+                formData.append('action', 'update');
+                formData.append('id', id);
+                formData.append('text', task.text);
+                formData.append('dueDate', task.due_date);
+                formData.append('completed', completed);
+
+                fetch('crud.php', {
+                    method: 'POST',
+                    body: formData
+                }).then(() => fetchTasks());
+            }
+        }
+
+        function editTask(index) {
+            const task = tasks[index];
+            const li = document.getElementById('taskList').children[index];
+            li.innerHTML = `
+                <form class="edit-form" onsubmit="updateTask(event, ${index})">
+                    <input type="text" value="${task.text}" required>
+                    <input type="datetime-local" value="${task.due_date.slice(0, 16)}">
+                    <div class="task-actions">
+                        <button type="submit"><i class="fas fa-save"></i></button>
+                        <button type="button" onclick="renderTasks()"><i class="fas fa-times"></i></button>
+                    </div>
+                </form>
+            `;
+            gsap.from(li.querySelector('.edit-form'), {opacity: 0, y: 20, duration: 0.5});
+        }
+
+        function updateTask(event, index) {
+            event.preventDefault();
+            const form = event.target;
+            const newText = form.elements[0].value;
+            const newDueDate = form.elements[1].value;
+            const task = tasks[index];
+
+            const formData = new FormData();
+            formData.append('action', 'update');
+            formData.append('id', task.id);
+            formData.append('text', newText);
+            formData.append('dueDate', newDueDate);
+            formData.append('completed', task.completed);
+
+            fetch('crud.php', {
+                method: 'POST',
+                body: formData
+            }).then(() => fetchTasks());
+        }
+
+        function deleteTask(id) {
+            const formData = new FormData();
+            formData.append('action', 'delete');
+            formData.append('id', id);
+
+            fetch('crud.php', {
+                method: 'POST',
+                body: formData
+            }).then(() => fetchTasks());
+        }
+
+        function formatDate(dateString) {
+            const options = { year: 'numeric', month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit' };
+            return new Date(dateString).toLocaleDateString(undefined, options);
+        }
+
+        document.getElementById('taskForm').addEventListener('submit', addTask);
+        
+        fetchTasks();
+    </script>
+</body>
+</html>
